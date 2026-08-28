@@ -4,11 +4,11 @@
 
 | | |
 |---|---|
-| **Doc version** | v1.0 — 2026-08-28 |
+| **Doc version** | v1.1 — 2026-08-28 |
 | **Audience** | IoT engineering team (firmware, hardware, field deployment) |
 | **Not for** | Client, funder, or end-user distribution — this document contains unresolved defects, cost gaps and risk language that needs engineering context to read correctly |
 | **Build phase** | Phase A (module prototype), pre-integration |
-| **Blocking status** | 🔴 **Cannot start integration** — MCU board identity unconfirmed (I-38), power subsystem and enclosure not purchased; **12 P0 defects** open (§7) |
+| **Blocking status** | 🟠 **Bench integration can start** — board confirmed as a 30-pin ESP-32S NodeMCU (**I-38 closed** 2026-08-28), so §4.2 stands; one residual check remains (module can marking, **I-34**). Power subsystem and enclosure still not purchased; **11 P0 defects** open (§7). Bench sequence: **`Incremental_Bringup_Plan.md`** |
 
 ---
 
@@ -21,6 +21,7 @@ This README is the **build document**: what to do, in what order, wired how, and
 | Document | Purpose | When you read it |
 |---|---|---|
 | **`README.md`** (this file) | Construction roadmap, connection templates, defect register, build sheets, previous-build lessons | Every day you're building |
+| **`Incremental_Bringup_Plan.md`** | **Bench sequence: pin distribution, pin budget, one-peripheral-at-a-time steps 0–11 with tests, traps and stop conditions** | Every day you're at the bench wiring. It sequences §3 stages S1–S4 and cites the §6 test IDs |
 | `Sundarbans_Monitoring_Station_Design_Spec.md` | Design rationale, theory, PCB/Phase-B design, power budget maths, field risk analysis | When you need to know *why* a choice was made, or you're starting Phase B |
 | `Sundarbans_Monitoring_Station_BOM.xlsx` | Procurement record with prices and supplier links | Purchasing, budget reporting |
 | `Equipments.xlsx` | Equipment/tooling list | Bench setup |
@@ -33,7 +34,7 @@ This README is the **build document**: what to do, in what order, wired how, and
 | # | Assumption | Why it matters | Confirmed? |
 |---|---|---|---|
 | A-1 | 3× core electronics received = **3 stations**, built sequentially (1 pilot → 2 fleet), not 1 station + 2 spares | Drives procurement quantity for power/enclosure (§2.3) and the fleet stage S8 | ☐ |
-| A-2 | **No LILYGO T-Call in hand** — discrete ESP32 Dev Module + SIM800L Mini on a **30-pin NodeMCU-32S / WROOM-32** board is the build path | All of §4 is wired for discrete, and §4.2 is derived specifically from WROOM-32 on a 30-pin board. The enclosure BOM note still says "Houses LILYGO board" — treated as stale. **⚠ The previous-build photos (§11) show a board that may not match this** — see **I-38**; this is the single assumption most likely to be wrong, and it invalidates §4.2 if it is | ☐ **verify first** |
+| A-2 | **No LILYGO T-Call in hand** — discrete ESP32 Dev Module + SIM800L Mini on a **30-pin NodeMCU-32S / WROOM-32** board is the build path | All of §4 is wired for discrete, and §4.2 is derived specifically from WROOM-32 on a 30-pin board. The enclosure BOM note still says "Houses LILYGO board" — treated as stale | ☑ **Confirmed 2026-08-28** — board is an "ESP32 ESP-32S 30P NodeMCU". §4.2 stands. Residual: read the module can marking (WROOM vs WROVER, **I-34**) |
 | A-3 | Water pH and water EC (K=10) RS-485 probes will be bought **later**, not before the pilot | Pilot node ships measuring soil + level + turbidity only (§3, stage S7) | ☐ |
 | A-4 | Sampling interval **15 min** default | Power budget and SD/data volume (**D-7**) | ☐ |
 | A-5 | 4–20 mA → RS-485 converter is **permanently dropped** | No analog current-loop path exists in the design | ☑ (BOM: "skip it") |
@@ -190,7 +191,7 @@ Stages are **gated**: do not start a stage until its predecessor's exit criteria
 
 **Tasks**
 
-- [ ] 🔴 **Identify the ESP32 board before anything else (I-38).** Read the shielded module's can marking (`ESP32-WROOM-32`, `-32D`, `-32E`, `-WROVER`, `ESP32-S3-WROOM-1`, …), count the pins per side, and count the USB receptacles. **§4.2 is only valid for a 30-pin WROOM-32 board with one USB port.** If the board has two USB ports, an RGB/addressable LED, or an S3/C3 marking, stop and re-derive §4.2 from that board's pinout — see §11.2
+- [x] ~~🔴 **Identify the ESP32 board before anything else (I-38).**~~ **Closed 2026-08-28** — board confirmed as an **ESP32 ESP-32S 30-pin NodeMCU**, so §4.2 is valid as written. One residual check survives: read the shielded module's **can marking** (`ESP32-WROOM-32`, `-32D`, `-32E` are all fine; **`ESP32-WROVER` is not** — PSRAM takes GPIO16/17 and the modem UART fails silently). That is **I-34**; do it before Step 2 of `Incremental_Bringup_Plan.md`
 - [ ] Confirm assumption **A-1** (3 stations vs 1 + spares) — this sets purchase quantities
 - [ ] Confirm assumption **A-2** (no LILYGO board on site, and the board is 30-pin WROOM-32)
 - [ ] Place the buy order above; log lead times for the battery/panel/controller
@@ -207,7 +208,7 @@ Stages are **gated**: do not start a stage until its predecessor's exit criteria
 
 **Exit criteria**
 
-- [ ] **I-38 closed** — board variant written on the §5 build sheet, and §4.2 either confirmed or re-derived
+- [x] **I-38 closed** (2026-08-28) — 30-pin ESP-32S NodeMCU confirmed; §4.2 stands. Still write the **module can marking** on the §5 build sheet to clear **I-34**
 - [ ] No line in §2.2 still blocking a stage you intend to start
 - [ ] §5 build sheet "Part identification" block filled for node #1
 - [ ] I-06, I-08, I-12, I-17 each resolved to a definite answer (not "probably")
@@ -217,6 +218,8 @@ Stages are **gated**: do not start a stage until its predecessor's exit criteria
 ### 3.3 S1 — Per-module bench bring-up (isolated)
 
 **Goal:** every module proven working *alone*, on USB/bench-supply power, before anything is integrated. Record results in the §6 test table — do not rely on memory.
+
+> 📋 **The step-by-step sequence for this stage lives in `Incremental_Bringup_Plan.md`** — one peripheral at a time, in order, with the pin claimed at each step, the trap to expect, and a stop condition. That document is the working procedure; the task list below is the stage's scope and gate. Note that the plan's steps run **sensors first and the modem last** (**D-11**), which is why its Step 10 re-verification sweep exists.
 
 > **This is the only stage where a solderless breadboard is allowed** (I-39, §11.1 L-1). Nothing that leaves S1 keeps its breadboard.
 
@@ -235,12 +238,27 @@ Stages are **gated**: do not start a stage until its predecessor's exit criteria
 
 **Exit criteria**
 
-- [ ] The **S1-scope** tests pass with measured numbers written into §6: **T1.1–T1.3, T2.1–T2.2, T3.1, T4.1–T4.3, T5.1–T5.2, T6.1, T7.1–T7.6, T8.1–T8.2**
-- [ ] **Deferred by design** (they need hardware that does not exist until S2/S3 — do not treat these as S1 blockers): **T3.2** (RO divider output, needs the S3 divider), **T6.2** (turbidity into ADC, needs the S3 divider), **T7.7** (transmit-burst rail sag, needs the S2 power tree). Each is listed against its own stage in §6
+- [ ] The **S1-scope** tests pass with measured numbers written into §6: **T1.1, T1.2, T2.1, T2.2, T2.3, T3.1, T3.3, T4.1, T4.2, T4.3, T5.1, T5.2, T5.3, T6.1, T7.1–T7.6, T8.1** (21 tests), plus **T13.1–T13.3** if the DS3231/SHT31 have arrived (D-8 — they are not yet purchased, and S1 is not blocked on them)
 - [ ] No ESP32 input pin has been exposed to >3.3 V at any point (over-voltage is cumulative damage, not pass/fail)
 - [ ] Soil probe register map documented in `docs/modbus_soil_probe.md`
 
-> **On test IDs:** the `T1`…`T8` labels above are *groups*; §6 breaks each into numbered steps (`T1.1`, `T1.2`, …) with a pass/fail and a measured-value column. Record against the §6 numbers — the groups here are only for ordering the bench work.
+**Deliberately deferred — these need hardware that does not exist until a later stage. Do not treat them as S1 blockers:**
+
+| Test | Needs | Runs in |
+|---|---|---|
+| T7.7 burst stability | the power tree and bulk capacitance | **S2** |
+| T9.1, T9.2 rail gate on/off | the high-side +12 V gate | **S2** |
+| T14.1 re-verify under GSM load | a working modem **and** everything above it | **S2** |
+| T3.2 RO level into ESP32 | the MAX485 RO divider | **S3** |
+| T3.4 fail-safe bias | the 560 Ω bias resistors | **S3** |
+| T6.2, T6.3 turbidity into ADC | the turbidity divider + RC | **S3** |
+| T12.1, T12.2 housekeeping dividers | the battery and PV sense taps | **S3** |
+| T10.1–T10.5, T11.1 | integrated firmware | **S4** |
+| T11.2 enclosure soak | the sealed enclosure | **S6** |
+
+> **Where `Incremental_Bringup_Plan.md` deviates from this table, and why.** The plan builds each signal-conditioning network **at the moment its sensor is first connected** — so the turbidity divider lands at its Step 4 and the housekeeping dividers at Step 5, rather than waiting for S3. That is deliberate and it is the safer order: the alternative is connecting a 4.5 V output to a 3.3 V pin and promising to fix it two stages later. The stage model above still governs *what gates what*; the plan governs *the order your hands move in*. Neither is wrong — but if you are ticking §6 rows, tick them when the measurement is actually taken.
+
+> **On test IDs:** the `T1`…`T8` labels in the task list above are *groups*; §6 breaks each into numbered steps (`T1.1`, `T1.2`, …) with a pass/fail and a measured-value column. Record against the §6 numbers — the groups here only set the order of the bench work. Between the S1-scope list and the deferral table, all **41** tests in §6 are accounted for.
 
 ---
 
@@ -254,7 +272,7 @@ Stages are **gated**: do not start a stage until its predecessor's exit criteria
 
 - [ ] Build battery input protection: **fuse → reverse-polarity P-MOS (or Schottky) → SMBJ TVS** (circuit in §4.5.6)
 - [ ] Set **LM2596 #1 to 4.10 V** under a 0.5 A dummy load; verify it holds. Lock the pot with nail varnish and label the module
-- [ ] Fit **1000 µF low-ESR + 470 µF** directly at SIM800L VBAT/GND with short, thick leads (I-02)
+- [ ] Fit **1000 µF low-ESR + 470 µF + 100 nF within 20 mm of the SIM800L VBAT/GND pads**, short thick leads (I-02). Bulk capacitance further away than that does almost nothing — see §11.1 L-7
 - [ ] Build the **5 V rail**. If keeping the 2 A USB module, solder wires to its output pads — **no USB cable in the final build** (I-07). Preferred: second LM2596 set to 5.0 V
 - [ ] Confirm the modem rail and the MCU rail are **separate converters** off the battery bus
 - [ ] Build the **high-side +12 V sensor rail gate** (§4.5.5) — do *not* use the IRF520 module as shipped (I-03)
@@ -336,7 +354,7 @@ Stages are **gated**: do not start a stage until its predecessor's exit criteria
 
 **Tasks**
 
-- [ ] Stand up the broker (Mosquitto on a small VPS) with **per-node credentials**
+- [ ] Stand up the broker (Mosquitto on a small VPS) with **per-node credentials** — self-hosted rather than ThingSpeak, per **D-9**, because offline alerting and a node registry are both required
 - [ ] Ingest → time-series DB (InfluxDB or TimescaleDB)
 - [ ] Grafana dashboards: tidal level curve, salinity/EC trend, pH, turbidity, soil moisture/EC, and a **fleet health panel** (VBAT, VSOL, CSQ, last-seen)
 - [ ] **Label the soil N/P/K panels "relative trend only — not agronomic"** on the dashboard *and* in the schema description (I-29). This is the one place a downstream user can be misled by a number that looks authoritative
@@ -405,7 +423,7 @@ Stages are **gated**: do not start a stage until its predecessor's exit criteria
 - [ ] Build nodes #2 and #3 **from the §5 build sheet and §4 templates only** — if you need to ask a question, the templates are incomplete; fix them
 - [ ] Add water pH + water EC (K=10) probes when purchased; assign addresses `0x02`/`0x03`; calibrate with both 1413 µS/cm and 12.88 mS/cm (I-24). This is the point at which the **I-33 scope gap closes** and the station measures its full advertised parameter set
 - [ ] Track fleet health for one month before declaring the design stable
-- [ ] Then start Phase B: custom PCB per spec §12, including the **LTE modem footprint** (I-14) and an isolated RS-485 option
+- [ ] Then start Phase B: custom PCB per spec §12, including the **LTE modem footprint** (I-14) and an isolated RS-485 option. **Not before S7 completes (D-10)** — the pilot will change the schematic, and a board spun early is a board spun twice
 
 ---
 
@@ -455,7 +473,7 @@ These are the **authoritative Phase-A wiring templates**. Copy §4.2, §4.4, §4
 
 **This table supersedes spec §11.1.** Copy it per node and tick as you wire.
 
-> 🔴 **Valid only for a 30-pin WROOM-32 board.** Confirm the module marking and pin count in S0 before you wire a single connection — see **I-38** and **§11.2**. On an ESP32-S3/C3 or a WROVER module this table is wrong in ways that fail silently, and it must be re-derived rather than adapted.
+> ✅ **Confirmed valid** (2026-08-28) — the board is a **30-pin ESP-32S NodeMCU**, which is exactly what this table is derived for (**I-38 closed**, A-2 ticked). One residual check before you wire: if the module can reads **`ESP32-WROVER`**, GPIO16/17 are consumed by PSRAM and the SIM800L UART assignment below fails silently — remap UART2 and update this table (**I-34**).
 
 | ESP32 pin | Net | Dir | Goes to | Conditioning required | Wired | Verified |
 |---|---|---|---|---|---|---|
@@ -592,7 +610,7 @@ Checks before first power-on: **measure LM2596 output = 4.10 V with the module d
 | Trig | `US_TRIG` | GPIO25 via TB3-12 (blue) | | | ☐ |
 | Echo | `US_ECHO` | GPIO33 via TB3-13 (blue) | **If powered at 5 V, add 10 kΩ/15 kΩ divider** (I-09) | | ☐ |
 
-Mode note: the module can be reconfigured to UART by fitting the mode resistor — more robust over a long cable. If you switch, re-map `US_TRIG`/`US_ECHO` to a hardware UART and update this table.
+Mode note: the module can be reconfigured to UART by fitting the mode resistor — more robust over a long cable. If you switch, re-map `US_TRIG`/`US_ECHO` to a hardware UART and update this table. This is open decision **D-6**; settle it after the **T5.1** accuracy test at final cable length, not before.
 
 #### 4.4.5 Turbidity module — analog
 
@@ -775,7 +793,7 @@ Only needed if the sensor is on `V5`. Powering it from `V3V3` is preferred and r
 
 ### 4.6 Internal terminal block / harness template
 
-One 16-position screw terminal strip (or three smaller blocks) on the enclosure floor. Every external cable lands here — **nothing external solders directly to a module.**
+One 16-position screw terminal strip (or three smaller blocks) on the enclosure floor. Every external cable lands here — **nothing external solders directly to a module, and nothing external arrives on a bare DuPont jumper** (I-39, §11.1 L-2).
 
 | TB | Pos | Net | Colour | To (external) | From (internal) | ✓ |
 |---|---|---|---|---|---|---|
@@ -889,7 +907,7 @@ Every row here resolves a defect whose fix *depends on which variant you actuall
 | Part | Marking / model observed | Notes |
 |---|---|---|
 | ESP32 module variant | WROOM-32 ☐ / WROVER ☐ | **I-34** — on WROVER, GPIO16/17 are taken by PSRAM; the §4.2 UART2 assignment breaks silently. Remap and update §4.2 |
-| ESP32 board form factor | NodeMCU-32S 30-pin ☐ / other: ________ | **I-38** — if it is not a 30-pin WROOM board (e.g. an S3, a C3, or a LILYGO variant), §4.2 must be re-derived before any wiring. See §11.2 |
+| ESP32 board form factor | NodeMCU-32S 30-pin ☑ **(confirmed 2026-08-28)** | **I-38 closed** — "ESP32 ESP-32S 30P NodeMCU". §4.2 is valid as written |
 | MAX485 IC marking | ____________ | **I-06** — MAX485 (5 V) ☐ / MAX3485 or SP3485 (3.3 V) ☐ → sets whether the RO divider is needed |
 | microSD module type | ____________ | **I-08** — LDO + level shifter ☐ / bare adapter ☐ → sets its supply rail |
 | SIM800L SIM slot | micro ☐ / nano ☐ | **I-12** — adapter fitted? ☐ |
@@ -1003,6 +1021,12 @@ Run in order. Record the actual number, not a tick — "works" is not data. Fill
 | T10.5 | Modem recovery | Hold the modem in a failed state | PWRKEY power-cycle recovers it with backoff | | ☐ |
 | T11.1 | 100-cycle soak | Unattended run | 0 unexplained resets, 100/100 rows logged | | ☐ |
 | T11.2 | 7-day enclosure soak | Sealed, solar + battery | 0 resets, no condensation, battery holds | | ☐ |
+| T12.1 | **Battery sense divider** | Bench supply 10 → 15 V into the `HK_VBAT` tap | Pin **≤ 3.19 V**; reported volts within **±2 %** of the DMM after `esp_adc_cal` | | ☐ |
+| T12.2 | **Solar sense divider** | Bench supply 0 → 22 V into the `HK_VSOL` tap | Pin **≤ 2.90 V**, monotonic, no clipping (fails if the divider is 100 k/27 k — I-28) | | ☐ |
+| T13.1 | I²C bus scan | Scan with DS3231 + SHT31 fitted | Exactly **0x68** and **0x44** respond, no ghost addresses | | ☐ |
+| T13.2 | RTC backup | Set time, remove USB 10 min, re-read | Time correct — proves the coin cell and holder | | ☐ |
+| T13.3 | SHT31 sanity | Compare against a reference thermometer | Within ±1 °C, RH plausible |  | ☐ |
+| T14.1 | **Re-verify under GSM load** | Modem publishing in a loop; re-run T2.2, T6.3, T12.1, T12.2, T3.3, T4.2, T5.1, T9.1 | Every one still passes; record quiet vs loaded values side by side (**D-11**) | | ☐ |
 
 **Any test in bold is a safety test for the ESP32.** Do not proceed past a failed bold test — you will be debugging a slowly dying GPIO for weeks.
 
@@ -1017,6 +1041,9 @@ Every item below is a real mismatch between the parts as bought and what the des
 - 🔴 **P0** — will destroy hardware, prevent a working build, or leave a required measurement missing. Fix before the stage named.
 - 🟠 **P1** — works on the bench, fails or corrupts data in the field. Fix before S7 (field install).
 - 🟡 **P2** — accuracy, maintainability, future-proofing. Schedule, don't ignore.
+- ✅ **Closed** — kept in the register with its original ID so the history stays readable. Never renumber, never delete.
+
+**Count: 41 issues raised, 1 closed. Open: 11 🔴 · 17 🟠 · 12 🟡.**
 
 ### 7.1 Register
 
@@ -1032,7 +1059,7 @@ Every item below is a real mismatch between the parts as bought and what the des
 | I-15 | 🔴 | Enclosure vs battery | The 158 × 90 × **65 mm** box cannot hold a 12 V 6 Ah LiFePO4 — packs in that capacity are typically **~151 × 65 × 94 mm** (SLA form factor), taller than the box's internal depth. The BOM note ("houses … battery") and the stale LILYGO reference are both wrong | **Measure the actual pack in S0.** Plan a **separate IP67 battery box** with a short ≥18 AWG feed to TB1. Do not shop for a bigger main box until the pack is measured | S6 |
 | I-19 | 🔴 | Procurement quantity | 3 sets of electronics, but **zero** power/enclosure sets and only **1 microSD card**. Nothing can be assembled into a station today | Decide D-1 (pilot-first vs fleet-first) and order per §2.3 / §3.2 | S2 |
 | I-28 | 🔴 | Solar voltage sense | A 12 V nominal panel's **open-circuit voltage is ~21–22 V**. The spec's 100 kΩ/27 kΩ divider would put **~4.7 V** on GPIO36 and damage it | Use **220 kΩ / 33 kΩ** on the PV+ tap (§4.5.7). 100 kΩ/27 kΩ is correct only for the battery tap | S3 |
-| I-38 | 🔴 | **MCU board identity not confirmed** | The board in the previous-build photos (§11) shows **two USB receptacles and an on-board RGB LED**, which a classic NodeMCU-32S (WROOM-32, one micro-USB, blue LED) does not have. That pattern matches an **ESP32-S3 / C3-class devkit or a LILYGO-family board** instead. If the build board is not a 30-pin WROOM-32, **the entire §4.2 GPIO map is invalid** — S3 boards renumber almost everything, have no GPIO16/17 UART convention, and route native USB on GPIO19/20, which §4.2 assigns to SD_MISO | **Read the module can marking and the silkscreen before any wiring** and record it on the §5 part-identification table. If it is not WROOM-32 on a 30-pin board, re-derive §4.2 from that board's datasheet — do not adapt it pin-by-pin. Assumption **A-2** depends on this | **S0 — before S1** |
+| I-38 | ✅ | **MCU board identity** — *closed 2026-08-28* | Raised because the previous-build photos (§11) appeared to show two USB receptacles and an RGB LED, which would have meant an ESP32-S3/C3 or LILYGO board and would have invalidated the whole of §4.2 | **Resolved: the build board is an "ESP32 ESP-32S 30P NodeMCU"** — a 30-pin WROOM-32-class devkit, exactly what §4.2 is derived for. §4.2 stands unchanged; **A-2 ticked**. Residual risk narrows to the module can marking (WROOM vs WROVER) which is tracked separately as **I-34** | ✅ closed |
 | I-39 | 🔴 | **Solderless breadboard + DuPont jumpers as the interconnect** | The previous build (§11) is entirely breadboard-and-jumper. Breadboard spring contacts are a high-resistance, un-sealable joint: contact resistance climbs with humidity and salt film, and the 2 A modem burst across a springy contact is exactly how "random reboots" are manufactured. Jumper pins also back out under thermal cycling and vibration | **No breadboard and no bare DuPont jumper in any field node.** Solder to protoboard, or crimp latching connectors (JST-XH / Molex), and land every off-board wire on the §4.6 terminal block. Breadboard is for S1 bench work only, and S1 explicitly ends before the power tree | S2 |
 | I-05 | 🟠 | Turbidity module | The probe head is sealed but the **comparator PCB is bare** — it is not an IP68 assembly, despite the BOM line reading "potted/IP68" | Mount the PCB **inside the enclosure**; only the probe head and its cable go in the water. Pot the cable-to-head joint | S6 |
 | I-07 | 🟠 | 5 V supply | Received part is a **2 A USB-output** step-down, not the 5 V/3 A screw-terminal module specified. A USB-A plug is a poor connection in a humid, vibrating enclosure, and 2 A leaves thin headroom | **Solder leads to the module's output pads** (no USB cable in the final build), or better: buy a **second LM2596** and set it to 5.00 V — you already trust that part (**D-5**) | S2 |
@@ -1068,7 +1095,7 @@ Every item below is a real mismatch between the parts as bought and what the des
 
 If you only do six things before touching the soldering iron:
 
-1. **I-38** — confirm the MCU board is a 30-pin WROOM-32. This costs thirty seconds and it decides whether §4.2 is a wiring map or a work of fiction. Do it first.
+1. **I-34** — read the module can marking. `WROOM-32/-32D/-32E` is fine; **`WROVER` breaks GPIO16/17** and the modem UART with it. Thirty seconds, and it is the last thing standing between §4.2 and a wiring iron. (**I-38**, the broader board-identity question, closed on 2026-08-28.)
 2. **I-01 + I-02** — trim the modem rail to 4.10 V and fit ≥1000 µF at VBAT. Skipping this produces weeks of "random reboots".
 3. **I-06** — read the MAX485 IC marking and decide the RO path. This is the most-missed defect on this platform and it damages the ESP32 slowly.
 4. **I-04 + I-28** — build both dividers before any analog wire reaches a GPIO.
@@ -1168,6 +1195,7 @@ encl_temp,encl_rh,sent_flag
 | D-8 | Fit DS3231 and SHT31? | yes / no | **Yes to both** — ~1,050 BDT for all three nodes (§3.2: 450 + 600), and both pay for themselves the first time you debug a field fault | | ☐ |
 | D-9 | Cloud platform | ThingSpeak / self-hosted Mosquitto+Influx+Grafana | Self-hosted — you need offline alerts and a node registry | | ☐ |
 | D-10 | Start the Phase-B PCB now or after the pilot? | now / after | **After S7.** The pilot will change the schematic | | ☐ |
+| D-11 | Bench integration order | modem early / **sensors first, modem last** | **Sensors first, modem last** — chosen 2026-08-28. Better debuggability: each peripheral is validated on a quiet 3.3 V rail with no radio, so a failure is unambiguously that peripheral's. **The cost:** nothing validated in Steps 1–8 stays validated once the SIM800L's 2 A TDMA bursts are present, so the plan carries a mandatory **Step 10 re-verification sweep** under GSM load. Sequence lives in `Incremental_Bringup_Plan.md` | white | ☑ |
 
 ---
 
@@ -1178,6 +1206,7 @@ encl_temp,encl_rh,sent_flag
 | Version | Date | Change |
 |---|---|---|
 | v1.0 | 2026-08-28 | First README. Built against the final purchased-parts list. Supersedes spec §11.1 pinout; adds **41** tracked compatibility issues (I-01…I-41) and 10 open decisions. Adds §11, lessons carried forward from the previous breadboard build |
+| v1.1 | 2026-08-28 | Board identity resolved — **I-38 closed**, **A-2 ticked**: the build board is a 30-pin ESP-32S NodeMCU, so §4.2 is confirmed valid rather than provisional. Open P0 count 12 → **11**. Adds **D-11** (bench integration order: sensors first, modem last) and **L-9** (identify boards from markings, re-derive don't adapt). Adds `Incremental_Bringup_Plan.md` to the §0.1 document map and links it from §3.3. §6 grows from 35 to **41** tests: **T12.1–T12.2** housekeeping dividers, **T13.1–T13.3** I²C RTC + SHT31, **T14.1** re-verification under GSM load — the last of these is the cost of D-11 and is mandatory |
 
 ### 10.2 Deltas vs `Sundarbans_Monitoring_Station_Design_Spec.md` v0.2
 
@@ -1220,20 +1249,23 @@ Two photographs of the earlier prototype are the most useful engineering documen
 | L-6 | Modules loose on the bench, no sub-plate | Field vibration and shipping load fall entirely on the wiring | Modules on standoffs over a cut FR4/acrylic sub-plate per §4.9; nothing mounted on the lid | §3.8 |
 | L-7 | Large electrolytics already present near the modem | Good instinct, and it should carry forward — but capacitance only works if it is **at** VBAT | ≥1000 µF low-ESR ∥ 470 µF ∥ 100 nF **within 20 mm of the SIM800L VBAT/GND pads**, on short thick leads. Bulk capacitance 100 mm away down a breadboard rail does close to nothing | **I-02** |
 | L-8 | Probes potted into PVC by hand | Also the right instinct — but hand-potting is where water gets in | Pot the cable-to-head joint with a proper two-part epoxy or marine polyurethane, cure fully, then **pressure- or dunk-test each probe for 24 h before install**, not after | §3.9 |
+| L-9 | The board's identity was inferred from a photo and a purchase description | Two USB ports and an RGB LED in a low-resolution photo nearly sent §4.2 back to the drawing board. It resolved fine, but the near-miss is the lesson: an entire GPIO map hangs on one silkscreen line | **Identify every board from its own markings** — module can, silkscreen, pin count — and write it on the §5 build sheet before wiring. If the board is not what a pin map was derived for, **re-derive the map, do not adapt it**; a half-adapted pin map produces a node that mostly works, which is the most expensive kind of broken | §11.2, **I-34** |
 
-### 11.2 The one thing to check before wiring anything
+### 11.2 The one thing to check before wiring anything — *resolved, but read the reasoning*
 
-The board at top centre in both photos has **two USB receptacles and an on-board RGB LED**. A classic NodeMCU-32S (WROOM-32) has one micro-USB and a plain blue LED. Two ports plus an RGB LED is the signature of an **ESP32-S3 / C3-class devkit** (native USB alongside the UART bridge) or a LILYGO-family board.
+> ✅ **Resolved 2026-08-28.** The build board is an **"ESP32 ESP-32S 30P NodeMCU"** — a 30-pin WROOM-32-class devkit. **§4.2 is valid as written**, **A-2 is ticked**, **I-38 is closed**. The remaining check is the module can marking (**I-34**), covered below. The rest of this section is kept because the reasoning is worth having the next time a board arrives.
 
-This matters more than anything else in this document, because **§4.2 is derived specifically for a 30-pin WROOM-32 board**:
+What raised the alarm: the board at top centre in both photos appeared to have **two USB receptacles and an on-board RGB LED**. A classic NodeMCU-32S has one micro-USB and a plain blue LED, and two ports plus RGB is the signature of an **ESP32-S3 / C3-class devkit** (native USB alongside the UART bridge) or a LILYGO-family board. The photo resolution was not good enough to call it, and guessing would have been worse than not knowing.
+
+Why it would have mattered more than anything else in this document — **§4.2 is derived specifically for a 30-pin WROOM-32 board**:
 
 - On an **ESP32-S3**, the GPIO numbering is different end to end. GPIO19/20 carry native USB, and §4.2 assigns GPIO19 to `SD_MISO` — that alone breaks the SD card and possibly the USB port. ADC channel grouping, strapping pins and the input-only pins (34–39, which do not exist on S3) all change too.
-- On a **WROVER** module, GPIO16/17 are consumed by PSRAM and the UART2 modem assignment fails silently (**I-34**).
+- On a **WROVER** module, GPIO16/17 are consumed by PSRAM and the UART2 modem assignment fails silently (**I-34**). **This one is still open** — read the can marking before Step 2 of `Incremental_Bringup_Plan.md`.
 - On a **LILYGO T-Call**, the SIM800L is already wired on-board to fixed pins and most of §4.4.1 becomes moot.
 
-The photo resolution is not good enough to call this from here, and guessing would be worse than not knowing. **Read the module can marking and count the pins per side.** Then either tick assumption **A-2** and proceed, or re-derive §4.2 from that board's own pinout — derive it fresh, do not adapt the table pin-by-pin, because the failure mode of a half-adapted pin map is a node that mostly works.
+**The lesson to carry (L-9): identify the board from its markings, not from a photo or a purchase description, and re-derive a pin map rather than adapting one.** The failure mode of a half-adapted pin map is a node that mostly works — which is the most expensive kind of broken.
 
-Record the answer on the §5 part-identification table and close **I-38**.
+Record the marking on the §5 part-identification table.
 
 
 
