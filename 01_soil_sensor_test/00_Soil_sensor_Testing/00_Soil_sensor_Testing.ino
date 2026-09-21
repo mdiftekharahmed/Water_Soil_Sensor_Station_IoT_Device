@@ -1,13 +1,17 @@
 #include <Arduino.h>
 
+// // Mosfet switch
+// #define Pin5v 26
+// #define Pin12v 33
+
 // =====================================================
 // ESP32 UART2 + MAX485 (Separate RE and DE Pins)
 // =====================================================
 
 #define RX2_PIN     16  // RO: goes to RX2 (goes with 10k/20k ohm voltage divider to convert 5v to 3.3v)
 #define TX2_PIN     17  // DI: goes to TX2
-#define RS485_RE    23  // RE:  Receiver Enable (Active LOW)
-#define RS485_DE    22  // DE:  Driver Enable   (Active HIGH)
+#define RS485_RE    23// RE:  Receiver Enable (Active LOW)
+#define RS485_DE    22 // DE:  Driver Enable   (Active HIGH)
 
 HardwareSerial RS485Serial(2);
 
@@ -52,6 +56,12 @@ void printHex(uint8_t *data, int length) {
 // =====================================================
 void setup() {
   Serial.begin(115200);
+
+  // pinMode(Pin12v, OUTPUT);
+  // pinMode(Pin5v, OUTPUT);
+
+  // digitalWrite(Pin12v, HIGH);
+  // digitalWrite(Pin5v, HIGH);
 
   // MAX485 direction pins configuration
   pinMode(RS485_RE, OUTPUT);
@@ -234,3 +244,10 @@ void loop() {
   readSoilSensor();
   delay(3000);
 }
+
+
+
+
+
+
+
