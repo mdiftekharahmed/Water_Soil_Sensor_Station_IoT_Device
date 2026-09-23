@@ -52,7 +52,7 @@
 
 
 const int trigPin = 26;
-const int echoPin = 34;
+const int echoPin = 35;
 const float speedOfSound = 0.0343;
 
 void setup() {

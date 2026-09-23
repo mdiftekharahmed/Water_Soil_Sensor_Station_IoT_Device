@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#define TDS_PIN          25     // Analog pin connected to TDS module signal pin
+#define TDS_PIN          36     // Analog pin connected to TDS module signal pin
 #define VREF             3.3    // ESP32 ADC reference voltage (3.3V)
 #define ADC_RESOLUTION   4095.0 // 12-bit ADC resolution
 #define SAMPLES          30     // Number of samples for smoothing filter

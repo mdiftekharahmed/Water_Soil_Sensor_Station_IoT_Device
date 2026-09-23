@@ -5,9 +5,9 @@
 
 // --- Pin Definitions ---
 #define LED_PIN        2            // Onboard LED (GPIO 2 on most ESP32 DevKit boards)
-#define I2C_SDA_PIN    15           // DS3231 SDA
+#define I2C_SDA_PIN    21          // DS3231 SDA
 #define I2C_SCL_PIN    4            // DS3231 SCL
-#define RTC_WAKE_PIN   GPIO_NUM_27  // DS3231 SQW pin connected to GPIO 27 (RTC_GPIO 17)
+#define RTC_WAKE_PIN   GPIO_NUM_39  // DS3231 SQW pin connected to GPIO 27 (RTC_GPIO 17)
 
 #define SLEEP_SECONDS  20           // Test interval
 

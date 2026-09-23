@@ -13,6 +13,9 @@
 #define RS485_RE    23// RE:  Receiver Enable (Active LOW)
 #define RS485_DE    22 // DE:  Driver Enable   (Active HIGH)
 
+
+
+
 HardwareSerial RS485Serial(2);
 
 // =====================================================
@@ -244,6 +247,9 @@ void loop() {
   readSoilSensor();
   delay(3000);
 }
+
+
+
 
 
 
