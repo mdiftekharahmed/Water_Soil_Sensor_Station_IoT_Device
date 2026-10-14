@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#define OTHER_RELAY_PIN 25
+
 #define TDS_PIN          36     // Analog pin connected to TDS module signal pin
 #define VREF             3.3    // ESP32 ADC reference voltage (3.3V)
 #define ADC_RESOLUTION   4095.0 // 12-bit ADC resolution
@@ -10,8 +12,10 @@ float temperature = 25.0;
 
 void setup() {
   Serial.begin(115200);
-  delay(1000);
+  pinMode(OTHER_RELAY_PIN, OUTPUT);
+  digitalWrite(OTHER_RELAY_PIN, LOW);
   
+  delay(1000);
   pinMode(TDS_PIN, INPUT);
   analogReadResolution(12); // Ensure 12-bit ADC resolution
   

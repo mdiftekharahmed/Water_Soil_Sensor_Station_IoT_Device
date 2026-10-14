@@ -26,18 +26,18 @@ void setup() {
 }
 
 void loop() {
-  // Serial.println("Turned OFF");
-  // // 1. Turn ALL relays OFF for 3 seconds
-  // for (uint8_t i = 0; i < numRelays; i++) {
-  //   digitalWrite(relayPins[i], RELAY_OFF);
-  // }
-  // Serial.println("Turned OFF");
-  // delay(3000);
+  Serial.println("Turned OFF");
+  // 1. Turn ALL relays OFF for 3 seconds
+  for (uint8_t i = 0; i < numRelays; i++) {
+    digitalWrite(relayPins[i], RELAY_OFF);
+  }
+  Serial.println("Turned OFF");
+  delay(3000);
 
-  // // 2. Turn ALL relays ON for 5 seconds
-  // for (uint8_t i = 0; i < numRelays; i++) {
-  //   digitalWrite(relayPins[i], RELAY_ON);
-  // }
-  // Serial.println("Turned ON");
-  // delay(3000);
+  // 2. Turn ALL relays ON for 5 seconds
+  for (uint8_t i = 0; i < numRelays; i++) {
+    digitalWrite(relayPins[i], RELAY_ON);
+  }
+  Serial.println("Turned ON");
+  delay(3000);
 }

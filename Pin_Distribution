@@ -1,0 +1,117 @@
+pins
+
+soil
+=====
+#define RX2_PIN     16  // RO: goes to RX2 (goes with 10k/20k ohm voltage divider to convert 5v to 3.3v)
+#define TX2_PIN     17  // DI: goes to TX2
+#define RS485_RE    23// RE:  Receiver Enable (Active LOW)
+#define RS485_DE    22 // DE:  Driver Enable   (Active HIGH)
+
+
+ultrasonic
+===========
+const int trigPin = 26;
+const int echoPin = 34;
+
+turbidity
+=========
+#define TRB_PIN 14
+
+GSM
+=====
+pin 32, 33
+
+
+relay
+=====
+const uint8_t relayPins[] = {5, 18,19, 21};
+
+
+tds
+====
+#define TDS_PIN          25 
+
+Time and RTC wake
+=================
+#define I2C_SDA_PIN    15           // DS3231 SDA
+#define I2C_SCL_PIN    4            // DS3231 SCL
+#define RTC_WAKE_PIN   GPIO_NUM_27  // DS3231 SQW pin connected to GPIO 27 (RTC_GPIO 17)
+
+new=================================================================================================
+
+
+pins
+
+soil / MAX485
+=============
+#define RX2_PIN     16   // Board label: 16
+#define TX2_PIN     17   // Board label: 17
+#define RS485_RE    23   // Board label: 23
+#define RS485_DE    22   // Board label: 22
+
+
+
+
+GSM
+===
+RX/TX = GPIO32, GPIO33
+
+// Board labels:
+// GPIO32 -> 32
+// GPIO33 -> 33
+
+
+relay
+=====
+const uint8_t relayPins[] = {
+    18    // GSM
+    13,   // modbus
+    14,   // soil sensor
+    25    // others sensors
+};
+
+
+turbidity
+=========
+#define TRB_PIN 34       // Board label: 34
+                         // ADC1, input-only
+
+tds
+===
+#define TDS_PIN 36       // Board label: VP                                                                               
+                         // GPIO36 = VP
+                         // ADC1, input-only
+
+ultrasonic
+==========
+const int trigPin = 26;  // Board label: 26
+const int echoPin = 35;  // Board label: 35
+                         // input-only
+
+
+
+Time and RTC wake
+=================
+#define I2C_SDA_PIN    21          // Board label: 21
+#define I2C_SCL_PIN    4           // Board label: 4
+
+#define RTC_WAKE_PIN   GPIO_NUM_39 // Board label: VN
+                                    // GPIO39 = VN
+                                    // input-only
+
+
+SD card
+=======
+#define SD_CS    5      // Board label: 5
+#define SD_SCK   18     // Board label: 18
+#define SD_MISO  19     // Board label: 19
+#define SD_MOSI  15     // Board label: 15
+
+
+free
+====
+GPIO27                // Board label: 27
+
+Waterproof DS18B20 Compatible Digital Temperature Sensor
+=========================================================
+on pin 27

@@ -3,7 +3,7 @@
 #include "RTClib.h"
 
 // I2C Pin Configuration
-#define I2C_SDA 15
+#define I2C_SDA 21
 #define I2C_SCL 4
 
 RTC_DS3231 rtc;

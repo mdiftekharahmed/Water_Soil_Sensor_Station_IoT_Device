@@ -1,4 +1,4 @@
-#define TRB_PIN 14
+#define TRB_PIN 34
 
 void setup() {
   Serial.begin(9600);
