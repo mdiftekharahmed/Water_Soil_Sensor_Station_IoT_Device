@@ -48,7 +48,7 @@
 //   return (long)(((float)duration / USONIC_DIV)*10.0);
 // }
 
-
+#define OTHER_RELAY_PIN 25
 
 
 const int trigPin = 26;
@@ -57,6 +57,10 @@ const float speedOfSound = 0.0343;
 
 void setup() {
   Serial.begin(115200);
+
+  pinMode(OTHER_RELAY_PIN, OUTPUT);
+  digitalWrite(OTHER_RELAY_PIN, LOW);
+
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   digitalWrite(trigPin, LOW);

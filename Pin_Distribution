@@ -41,7 +41,6 @@ new=============================================================================
 
 
 pins
-
 soil / MAX485
 =============
 #define RX2_PIN     16   // Board label: 16
@@ -103,7 +102,7 @@ Time and RTC wake
 SD card
 =======
 #define SD_CS    5      // Board label: 5
-#define SD_SCK   18     // Board label: 18
+#define SD_SCK   2     // Board label: 18
 #define SD_MISO  19     // Board label: 19
 #define SD_MOSI  15     // Board label: 15
 

@@ -35,7 +35,7 @@ const char GPRS_PASS[] = "";
 const char MQTT_HOST[] = "telemetry.durnibar.tech";
 const uint16_t MQTT_PORT = 1883;
 const char MQTT_USER[] = "TEST_03";
-const char MQTT_PASSWORD[] = "PUT_YOUR_ROTATED_PASSWORD_HERE";
+const char MQTT_PASSWORD[] = "nvdzB6OuHcTwvcAW";
 const char DEVICE_ID[] = "TEST_03";
 const char MQTT_TOPIC[] = "devices/TEST_03/telemetry";
 
@@ -52,9 +52,15 @@ bool pingGoogleTcp();
 bool connectMqtt();
 bool publishTelemetry();
 
+
+
+#define GSM_RELAY_PIN 18
 void setup() {
   SerialMon.begin(115200);
   delay(1000);
+
+    pinMode(GSM_RELAY_PIN, OUTPUT);
+    digitalWrite(GSM_RELAY_PIN, LOW);
 
   pinMode(GSM_RELAY_PIN, OUTPUT);
   digitalWrite(GSM_RELAY_PIN, LOW);
@@ -101,6 +107,16 @@ void setup() {
   mqtt.setBufferSize(512);
 
   networkReady = true;
+
+
+    // Keep the Google TCP test in the loop for diagnostic logging.
+  const bool googleReachable = pingGoogleTcp();
+
+  if (googleReachable) {
+    SerialMon.println("Internet test passed");
+  } else {
+    SerialMon.println("Internet test failed");
+  }
 }
 
 void loop() {
@@ -109,14 +125,7 @@ void loop() {
     return;
   }
 
-  // Keep the Google TCP test in the loop for diagnostic logging.
-  const bool googleReachable = pingGoogleTcp();
 
-  if (googleReachable) {
-    SerialMon.println("Internet test passed");
-  } else {
-    SerialMon.println("Internet test failed");
-  }
 
   if (modem.isGprsConnected()) {
     if (!mqtt.connected()) {
@@ -231,10 +240,8 @@ bool publishTelemetry() {
   JsonObject values = doc["values"].to<JsonObject>();
 
   // Demo values. Replace these with readings from your sensors.
-  values["temperature"] = 24.5;
-  values["humidity"] = 60.0;
   values["systemTemp"] = 25.0;
-  values["NPK"] = 123;
+  values["Distance"] = 123;
 
   char payload[256];
   const size_t payloadLength =

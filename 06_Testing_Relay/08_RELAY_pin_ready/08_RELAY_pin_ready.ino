@@ -5,6 +5,13 @@
 #define SOIL_RELAY_PIN 14
 #define OTHER_RELAY_PIN 25
 
+
+// #define GSM_RELAY_PIN 8
+// #define MODBUS_RELAY_PIN 9
+// #define SOIL_RELAY_PIN 10
+// #define OTHER_RELAY_PIN 11
+
+
 void setup() {
   Serial.begin(115200);
 
@@ -23,35 +30,35 @@ void setup() {
 }
 
 void loop() {
-  Serial.println("Relay 1 ON");
-  digitalWrite(GSM_RELAY_PIN, LOW);
-  delay(3000);
+  // Serial.println("GSM 1 ON");
+  // digitalWrite(GSM_RELAY_PIN, LOW);
+  // delay(3000);
+ 
+  // Serial.println("GSM 1 OFF");
+  // digitalWrite(GSM_RELAY_PIN, HIGH);
+  // delay(1000);
 
-  Serial.println("Relay 1 OFF");
-  digitalWrite(GSM_RELAY_PIN, HIGH);
-  delay(1000);
+  // Serial.println("MODBUS 2 ON");
+  // digitalWrite(MODBUS_RELAY_PIN, LOW);
+  // delay(3000);
 
-  Serial.println("Relay 2 ON");
-  digitalWrite(MODBUS_RELAY_PIN, LOW);
-  delay(3000);
+  // Serial.println("MODBUS 2 OFF");
+  // digitalWrite(MODBUS_RELAY_PIN, HIGH);
+  // delay(1000);
 
-  Serial.println("Relay 2 OFF");
-  digitalWrite(MODBUS_RELAY_PIN, HIGH);
-  delay(1000);
+  // Serial.println("SOIL 3 ON");
+  // digitalWrite(SOIL_RELAY_PIN, LOW);
+  // delay(3000);
 
-  Serial.println("Relay 3 ON");
-  digitalWrite(SOIL_RELAY_PIN, LOW);
-  delay(3000);
+  // Serial.println("SOIL 3 OFF");
+  // digitalWrite(SOIL_RELAY_PIN, HIGH);
+  // delay(1000);
 
-  Serial.println("Relay 3 OFF");
-  digitalWrite(SOIL_RELAY_PIN, HIGH);
-  delay(1000);
-
-  Serial.println("Relay 4 ON");
+  Serial.println("OTHER 4 ON");
   digitalWrite(OTHER_RELAY_PIN, LOW);
   delay(3000);
 
-  Serial.println("Relay 4 OFF");
+  Serial.println("OTHER 4 OFF");
   digitalWrite(OTHER_RELAY_PIN, HIGH);
   delay(3000);
 }

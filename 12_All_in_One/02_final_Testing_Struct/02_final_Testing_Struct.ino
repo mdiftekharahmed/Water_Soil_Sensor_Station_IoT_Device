@@ -116,10 +116,10 @@
 // Functions
   bool readSoilSensor(SensorData &data);
   void enableSoilSensor();
-  float getDistance();
-  float getTurbidity();
-  float getWaterTemp();
-  float getTDS();
+  float getDistance(SensorData &data);
+  float getTurbidity(SensorData &data);
+  float getWaterTemp(SensorData &data);
+  float getTDS(SensorData &data);
 // ======================== Setup =============================
 void setup() {
   Serial.begin(115200);
@@ -137,7 +137,7 @@ void setup() {
     digitalWrite(GSM_RELAY_PIN, HIGH);
     digitalWrite(MODBUS_RELAY_PIN, HIGH);
     digitalWrite(SOIL_RELAY_PIN, HIGH);
-    digitalWrite(OTHER_RELAY_PIN, HIGH);
+    digitalWrite(OTHER_RELAY_PIN, LOW);
 
   
   // MAX485 and Soil Sensor
@@ -151,6 +151,7 @@ void setup() {
     digitalWrite(RS485_RE, LOW);
     digitalWrite(RS485_DE, LOW);
 
+    delay(1000);
     // HardwareSerial 2 setup
     RS485Serial.begin(4800, SERIAL_8N1, RX2_PIN, TX2_PIN);
 
@@ -190,6 +191,9 @@ void setup() {
   // TDS METER
     analogReadResolution(12);
     analogSetPinAttenuation(TDS_PIN, ADC_11db);
+
+
+  digitalWrite(OTHER_RELAY_PIN, HIGH);
 }
 
 
@@ -221,24 +225,26 @@ void loop() {
           Serial.println("Soil sensor read failed.");
         }
 
-      // enableOtherPins();
-      // float dist = getDistance();
-      // Serial.print("distance: ------------> ");
-      // Serial.println(dist);
-
-      // float turbidity = getTurbidity();
-      // Serial.print("Turbidty: ------------> ");
-      // Serial.println(turbidity);
-
-      // float waterTemp =  getWaterTemp();
-      // Serial.print("Water Temp: ------------> ");
-      // Serial.println(waterTemp);
-
-      // float tds = getTDS();
-      // Serial.print("TDS:-------------------> ");
-      // Serial.println(tds);
       
-      // disableOtherPins();
+      enableOtherPins();
+      float dist = getDistance(sensorData);
+      Serial.print("distance: ------------> ");
+      Serial.println(sensorData.distanceCm);
+
+      float turbidity = getTurbidity(sensorData);
+      Serial.print("Turbidty: ------------> ");
+      Serial.println(sensorData.turbidityVoltage);
+
+      delay(2000);
+      float waterTemp =  getWaterTemp(sensorData);
+      Serial.print("Water Temp: ------------> ");
+      Serial.println(sensorData.waterTemperatureC);
+
+      float tds = getTDS(sensorData);
+      Serial.print("TDS:-------------------> ");
+      Serial.println(sensorData.tdsPpm);
+      
+      disableOtherPins();
       delay(3000);
 }
 
@@ -423,7 +429,7 @@ void loop() {
     delay(1000);
   }
 
-  float getDistance(){
+  float getDistance(SensorData &data){
 
     float arr[num_of_read];
     for(int  i=0;i<num_of_read;i++){
@@ -471,10 +477,14 @@ void loop() {
     for(int i=3;i<7;i++){
       val+= arr[i];
     }
+    data.distanceCm = val/4;
+    if(arr[5]==-1)data.distanceValid = false;
+    else data.distanceValid = true;
+
     return val/4;
   }
 
-  float getTurbidity(){
+  float getTurbidity(SensorData &data){
     float arr[num_of_read];
     for(int  i=0;i<num_of_read;i++){
       int raw = analogRead(TRB_PIN);
@@ -516,10 +526,14 @@ void loop() {
     for(int i=3;i<7;i++){
       val+= arr[i];
     }
+
+    data.turbidityVoltage = val/4;
+    if(arr[5]==-1)data.turbidityValid = false;
+    else data.distanceValid = true;
     return val/4;
   }
 
-  float getWaterTemp(){
+  float getWaterTemp(SensorData &data){
     float arr[num_of_read];
     for(int  i=0;i<num_of_read;i++){
       sensors.requestTemperatures();
@@ -559,10 +573,15 @@ void loop() {
     for(int i=3;i<7;i++){
       val+= arr[i];
     }
+
+    data.waterTemperatureC = val/4;
+    if(arr[5]==-1)data.waterTemperatureValid = false;
+    else data.distanceValid = true;
     return val/4;
+
   }
 
-  float getTDS(){
+  float getTDS(SensorData &data){
     uint32_t millivoltSum = 0;
 
     // Discard one initial reading, then collect calibrated readings.
@@ -598,5 +617,9 @@ void loop() {
     Serial.print(tdsPpm, 0);
     Serial.println(" ppm");
 
+    data.tdsPpm = tdsPpm;
+    data.tdsVoltage = voltage;
+
     return tdsPpm;
   }
+

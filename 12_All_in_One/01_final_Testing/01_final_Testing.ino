@@ -174,10 +174,12 @@ void loop() {
 
     // ==========Collect Data==========
 
-      // enableSoilSensor();
-      // readSoilSensor();
-      // delay(3000);
-      // disableSoilSensor();
+      
+      enableSoilSensor();
+      delay(3000);
+      readSoilSensor();
+      delay(3000);
+      disableSoilSensor();
 
       // enableOtherPins();
       // float dist = getDistance();
@@ -197,7 +199,7 @@ void loop() {
   // Serial.println(tds);
   // disableOtherPins();
 
-  enableGSMPin();
+  // enableGSMPin();
   
 }
 

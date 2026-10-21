@@ -2,7 +2,7 @@
 #include <SPI.h>
 #include <SD.h>
 
-
+#define OTHER_RELAY_PIN 25
 
 
 // ============================================================
@@ -234,7 +234,12 @@ void setup()
 {
     Serial.begin(115200);
 
-    delay(1000);
+    pinMode(OTHER_RELAY_PIN, OUTPUT);
+    digitalWrite(OTHER_RELAY_PIN, LOW);
+    
+    
+    
+    delay(3000);
 
     Serial.println();
     Serial.println("========================================");
