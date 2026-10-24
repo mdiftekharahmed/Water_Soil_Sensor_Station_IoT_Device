@@ -12,13 +12,28 @@
 #include <string.h>
 
 // GSM Settings
-  #define TINY_GSM_DEBUG Serial
-  #define DUMP_AT_COMMANDS
-  #include <StreamDebugger.h>
-  StreamDebugger debugger(Serial1, Serial);
+  // #define TINY_GSM_DEBUG Serial
+  // #define DUMP_AT_COMMANDS
 
+  // #define DUMP_AT_COMMANDS
+  // #define TINY_GSM_DEBUG Serial
+  // #include <StreamDebugger.h>
+  // StreamDebugger debugger(Serial1, Serial);
+
+  // #define TINY_GSM_MODEM_SIM800
+  // #define TINY_GSM_RX_BUFFER 1024
+  // #include <TinyGsmClient.h>
+  // #include <ESP_SSLClient.h>
+  // #include <sys/time.h>
+  // GSM Settings
+  #define MODEM_LOG 1           // 1 = show AT commands/replies, 0 = silent
   #define TINY_GSM_MODEM_SIM800
   #define TINY_GSM_RX_BUFFER 1024
+  #if MODEM_LOG
+    #define TINY_GSM_DEBUG Serial   // must come before TinyGsmClient.h
+    #include <StreamDebugger.h>
+    StreamDebugger debugger(Serial1, Serial);
+  #endif
   #include <TinyGsmClient.h>
   #include <ESP_SSLClient.h>
   #include <sys/time.h>
@@ -45,9 +60,9 @@
 
   // Device credentials from IoT-Telemetry-Hub
   // The user is the device_id. The password was generated when creating the device.
-  const char* mqtt_user = "TEST_01"; 
-  const char* mqtt_password = "Gh8BbWRCQxLzyM4S";
-  const char* device_id = "TEST_01";
+  const char* mqtt_user = "MGRV_101"; 
+  const char* mqtt_password = "Iy3Cb7RlVwHyqGJz";
+  const char* device_id = "MGRV_101";
 
 // ==========================================
 // ---------- GSM (SIM800L) + TLS ----------
@@ -91,7 +106,12 @@ TT0mQ/r5XyA4MEAiabn7XJjvCERlF2dcn2wqJw+CreTkkQ2R
 )EOF";
 #endif
 
-  TinyGsm       modem(SerialAT);
+  // TinyGsm       modem(SerialAT);
+  #if MODEM_LOG
+    TinyGsm modem(debugger);   // logs every byte to/from the SIM800L
+  #else
+    TinyGsm modem(SerialAT);
+  #endif
   TinyGsmClient gsmTransport(modem);
   ESP_SSLClient sslClient;
   PubSubClient  gsmMqtt(sslClient);
@@ -111,13 +131,11 @@ Preferences pref;
     SPIClass SD_SPI(VSPI);
     const char* CSV_FILE_PATH = "/sensor_data.csv";
   // Time Module
-    #define FORCE_SET_RTC 0
     // --- Pin Definitions ---
     #define I2C_SDA_PIN    21          // DS3231 SDA
     #define I2C_SCL_PIN    4            // DS3231 SCL
     #define RTC_WAKE_PIN   GPIO_NUM_39  // DS3231 SQW pin connected to GPIO 27 (RTC_GPIO 17)
     #define INTERVAL_30_MIN true
-    #define SLEEP_SECONDS  300           // Test interval
 
     RTC_DS3231 rtc;
   // Relay Switch
@@ -260,9 +278,7 @@ Preferences pref;
   void nvsMarkSent();
   void handleSendFailure();
   static bool gsmPowerUp();
-  static bool gsmPowerUp();
   static void gsmPowerDown();
-  static bool rtcSyncFromNetwork();
 
   
   
@@ -342,72 +358,6 @@ void setup() {
     analogSetPinAttenuation(TDS_PIN, ADC_11db);
 
 
-  // // Time module
-
-    //   Serial.println("\n==========================================");
-    //   Serial.println("[STEP 1] ESP32 Woke Up / Booted");
-
-    //   // Check how the ESP32 was triggered
-    //   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
-    //   if (wakeup_reason == ESP_SLEEP_WAKEUP_EXT0) {
-    //     Serial.println("[STATUS] Wakeup Cause: DS3231 Alarm Interrupt (GPIO 27 / EXT0)");
-    //   } else {
-    //     Serial.println("[STATUS] Wakeup Cause: Power-on or Manual Reset");
-    //   }
-
-    //   // 2. Initialize I2C and DS3231
-    //   Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
-    //   if (!rtc.begin()) {
-    //     Serial.println("[ERROR] DS3231 not found on GPIO 15/4! Halting.");
-    //     while (1);
-    //   }
-
-    //   if (rtc.lostPower()) {
-    //     Serial.println("[WARN] RTC lost power, syncing to compile time...");
-    //     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    //   }
-
-    //   DateTime now = rtc.now();
-    //   Serial.printf("[TIME] Current RTC Time: %04d-%02d-%02d %02d:%02d:%02d\n",
-    //                 now.year(), now.month(), now.day(),
-    //                 now.hour(), now.minute(), now.second());
-
-    //   // 3. Blink LED 10 Times
-    //   Serial.println("\n[STEP 2] Starting 10-Blink Sequence...");
-    //   Serial.println("[STATUS] 10 Blinks completed.");
-
-    //   // 4. Configure DS3231 SQW for Alarm Interrupt Mode
-    //   Serial.println("\n[STEP 3] Arming DS3231 Alarm 1 for 20 Seconds Ahead...");
-    //   rtc.disable32K();
-    //   rtc.writeSqwPinMode(DS3231_OFF); // Puts SQW line in alarm interrupt mode
-
-    //   // Clear existing alarm flags to ensure SQW line is released HIGH (3.3V)
-    //   rtc.clearAlarm(1);
-    //   rtc.clearAlarm(2);
-    //   rtc.disableAlarm(2);
-
-    //   // Set Alarm 1 for 20 seconds into the future
-    //   now = rtc.now();
-    //   DateTime alarmTime = now + TimeSpan(SLEEP_SECONDS);
-    //   rtc.setAlarm1(alarmTime, DS3231_A1_Date); // Exact match: date, hour, minute, second
-
-    //   Serial.printf("[ALARM] Armed for %02d:%02d:%02d (Wait duration: %d seconds)\n",
-    //                 alarmTime.hour(), alarmTime.minute(), alarmTime.second(), SLEEP_SECONDS);
-
-    //   // Clear alarm flag once more so the pin remains HIGH before entering sleep
-    //   rtc.clearAlarm(1);
-
-    //   // 5. Configure ESP32 EXT0 Wakeup
-    //   Serial.println("\n[STEP 4] Arming ESP32 EXT0 Wakeup on GPIO 27 (Trigger: LOW)...");
-    //   esp_sleep_enable_ext0_wakeup(RTC_WAKE_PIN, 0); // 0 = wake when SQW pulls pin to 0V
-
-    //   // 6. Enter Deep Sleep
-    //   Serial.println("[STEP 5] Entering Deep Sleep. Waiting for DS3231 alarm...");
-    //   Serial.println("==========================================\n");
-    //   Serial.flush();
-
-    //   // esp_deep_sleep_start();
-
   //Time module wakes on xx:00:00 and xx:30:00
 
       pinMode(RTC_WAKE_PIN, INPUT_PULLUP);
@@ -429,8 +379,11 @@ void setup() {
         while (1);
       }
 
-      if (rtc.lostPower() || FORCE_SET_RTC) {
-        rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));  // must be Dhaka local time
+      // if (rtc.lostPower() || FORCE_SET_RTC) {
+      //   rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));  // must be Dhaka local time
+      // }
+      if (rtc.lostPower()) {
+        Serial.println("[RTC] WARNING: clock lost power, time is NOT valid. Run the time-setter sketch.");
       }
 
       DateTime now = rtc.now();
@@ -518,7 +471,7 @@ void loop() {
 
       // Read current timestamp from DS3231
         // Set to your RTC's offset from UTC in seconds (0 if the RTC already holds UTC)
-        DateTime now = rtc.now() - TimeSpan(RTC_UTC_OFFSET_SEC);
+        DateTime now = rtc.now();
 
         // ISO 8601 UTC, e.g. 2026-10-18T09:30:00Z (20 chars, fits timeStamp[25])
         snprintf(sensorData.timeStamp, sizeof(sensorData.timeStamp), "%04d-%02d-%02dT%02d:%02d:%02dZ",
@@ -607,6 +560,7 @@ void loop() {
   
   // // // sendTelemetry(sensorData);
   
+  delay(3000);
   if (gsmSendTelemetry(sensorData)) {
     nvsMarkSent();
   } else {
@@ -623,9 +577,21 @@ void loop() {
     
     delay(5000);
 
-  printSensorData(sensorData);
-  delay(3000);
-  esp_deep_sleep_start();
+  // BEFORE
+    // printSensorData(sensorData);
+    // delay(3000);
+    // esp_deep_sleep_start();
+
+  // AFTER
+    printSensorData(sensorData);
+    delay(3000);
+
+    // Release SQW (HIGH) so only a FUTURE :00 / :30 alarm wakes the ESP32
+    rtc.clearAlarm(1);
+    rtc.clearAlarm(2);
+    esp_sleep_enable_ext0_wakeup(RTC_WAKE_PIN, 0);   // wake when SQW goes LOW
+    Serial.flush();
+    esp_deep_sleep_start();
 }
 
 // Function Definition
@@ -1301,7 +1267,6 @@ void loop() {
     Serial.println("===============================");
   }
   
-
 void gsmConfigure() {
   sslClient.setClient(&gsmTransport);
   #if USE_CA_VERIFY
@@ -1361,9 +1326,29 @@ void gsmConfigure() {
 
     // if (!modem.restart())                        { Serial.println("[GSM] Modem init failed"); gsmPowerDown(); return false; }
 
+    // if (!gsmPowerUp()) { Serial.println("[GSM] Modem init failed"); gsmPowerDown(); return false; }
+
+    // if (!modem.waitForNetwork(60000L))           { Serial.println("[GSM] No network");        gsmPowerDown(); return false; }
+    // if (!modem.gprsConnect(GSM_APN, "", ""))     { Serial.println("[GSM] GPRS failed");       gsmPowerDown(); return false; }
+
     if (!gsmPowerUp()) { Serial.println("[GSM] Modem init failed"); gsmPowerDown(); return false; }
 
-    if (!modem.waitForNetwork(60000L))           { Serial.println("[GSM] No network");        gsmPowerDown(); return false; }
+    Serial.printf("[GSM] VBAT = %u mV\n", modem.getBattVoltage());   // optional: 4500+ = over-voltage risk
+
+    bool net = false;
+    for (int i = 0; i < 30 && !net; i++) {                // up to 150 s
+      net = modem.waitForNetwork(5000L);
+      if (net) break;
+      Serial.printf("[GSM] waiting %ds CSQ=%d reg=%d\n", (i + 1) * 5,
+                    modem.getSignalQuality(), (int)modem.getRegistrationStatus());
+      if (!modem.testAT(1000)) {                          // modem shut itself down
+        Serial.println("[GSM] Modem went silent -> power-cycling");
+        SerialAT.end();
+        if (!gsmPowerUp()) break;
+      }
+    }
+    if (!net) { Serial.println("[GSM] No network"); gsmPowerDown(); return false; }
+
     if (!modem.gprsConnect(GSM_APN, "", ""))     { Serial.println("[GSM] GPRS failed");       gsmPowerDown(); return false; }
 
     // System clock for TLS certificate validity, taken from the DS3231 (as UTC)
@@ -1376,6 +1361,8 @@ void gsmConfigure() {
       connected = gsmMqtt.connect(device_id, mqtt_user, mqtt_password);
       if (!connected) {
         Serial.printf("[GSM] MQTT connect failed, state=%d\n", gsmMqtt.state());
+        sslClient.stop();
+        gsmTransport.stop();
         delay(2000);
       }
     }

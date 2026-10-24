@@ -39,10 +39,10 @@ const char GPRS_PASS[] = "";
 // ---------- MQTT over TLS ----------
 const char MQTT_HOST[] = "telemetry.durnibar.tech";
 const uint16_t MQTT_PORT = 8883;
-const char MQTT_USER[] = "DEP_01";
-const char MQTT_PASSWORD[] = "AMesBkPgkN1xbsQN";
-const char DEVICE_ID[] = "TEST_DEP_0102";
-const char MQTT_TOPIC[] = "devices/TEST_03/telemetry";
+const char MQTT_USER[] = "TEST_01";
+const char MQTT_PASSWORD[] = "Gh8BbWRCQxLzyM4S";
+const char DEVICE_ID[] = "TEST_01";
+const char MQTT_TOPIC[] = "devices/TEST_01/telemetry";
 
 // 0 = encrypted but server NOT verified (use only to prove the chain works)
 // 1 = verify the broker against ROOT_CA below (use this for deployment)

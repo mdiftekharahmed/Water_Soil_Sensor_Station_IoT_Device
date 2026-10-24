@@ -259,6 +259,10 @@
 
 #include <Arduino.h>
 
+
+#define MODBUS_RELAY_PIN 13
+#define SOIL_RELAY_PIN 14
+
 // =====================================================
 // ESP32 UART2 + MAX485 (Separate RE and DE Pins)
 // =====================================================
@@ -324,6 +328,12 @@ void setRS485Receive() {
 // =====================================================
 void setup() {
   Serial.begin(115200);
+
+  pinMode(MODBUS_RELAY_PIN, OUTPUT);
+  pinMode(SOIL_RELAY_PIN, OUTPUT);
+
+  digitalWrite(MODBUS_RELAY_PIN, LOW);
+  digitalWrite(SOIL_RELAY_PIN, LOW);
 
   // Configure separate direction pins
   pinMode(RS485_RE, OUTPUT);
